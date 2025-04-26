@@ -4,94 +4,130 @@ if (typeof browser === "undefined") {
   var browser = chrome;
 }
 
-//elements
-const frontInput = document.getElementById("flashcard-front");
-const backInput = document.getElementById("flashcard-back");
-const hintInput = document.getElementById("flashcard-hint");
-const tagInput = document.getElementById("flashcard-tags");
-const saveButton = document.getElementById("save");
-const clearButton = document.getElementById("clear");
-const statusMsg = document.getElementById("status-msg");
-const recentCardList = document.getElementById("recent-cards");
+// wait until the initial HTML document is fully loaded and parsed
 
-//save flashcard
-function saveFlashcard() {
-  const front = frontInput.value.trim();
-  const back = backInput.value.trim();
-  const hint = hintInput.value.trim();
-  const tags = tagInput.value.trim();
+document.addEventListener("DOMContentLoaded", () => {
+  console.log("[Popup] DOM content loaded.");
 
-  //check if either frant or back are empty + update status if they are
+  // dom elements
+  const frontInput = document.getElementById("flashcard-front");
+  const backInput = document.getElementById("flashcard-back");
+  const hintInput = document.getElementById("flashcard-hint");
+  const tagsInput = document.getElementById("flashcard-tag");
+  const saveButton = document.getElementById("save");
+  const clearButton = document.getElementById("clear");
+  const statusMessage = document.getElementById("status-msg");
+  const recentCardsList = document.getElementById("recent-cards");
 
-  if (!front || !back) {
-    statusMsg.textContent = "front and back are required";
-    statusMsg.style.color = "red";
-    return;
+  if (
+    !frontInput ||
+    !backInput ||
+    !saveButton ||
+    !statusMessage ||
+    !recentCardsList
+  ) {
+    console.error("[Popup] Critical DOM elements not found!");
+
+    //display an error to the user in the popup itself
+
+    statusMessage.textContent = "error initializing popup elements.";
+    statusMessage.style.color = "red";
+
+    return; // stop execution if essential elements are missing
   }
 
-  //create flashcard
+  console.log("[Popup] DOM elements initialized successfully.");
 
-  const flashcard = {
-    front,
-    back,
-    hint,
-    tags: tags.split(",").map((tag) => tag.trim()),
-    createdAt: new Date().toISOString(),
-  };
+  // function definitions
 
-  //update the status and update the flashcards
+  //save flashcard
 
-  browser.storage.local
-    .get({ flashcards: [] })
-    .then((result) => {
-      const updatedCards = [...result.flashcards, flashcard];
-      return browser.storage.local.set({ flashcards: updatedCards });
-    })
-    .then(() => {
-      statusMsg.textContent = "Flashcard saved!";
-      statusMsg.style.color = "#28a745";
-      clearForm();
-      loadRecentCards();
-    })
-    .catch((error) => {
-      console.error("Error saving flashcard:", error);
-      statusMsg.textContent = "Error saving flashcard!";
-      statusMsg.style.color = "red";
-    });
-}
+  function saveFlashcard() {
+    console.log("[Popup] Save button clicked.");
+    const front = frontInput.value.trim();
+    const back = backInput.value.trim();
+    const hint = hintInput.value.trim();
 
-saveButton.addEventListener("click", saveFlashcard);
+    // split tags  trim whitespace and filter out any empty strings
 
-// clear form function
+    const tags = tagsInput.value
+      .split(",")
+      .map((tag) => tag.trim())
+      .filter(Boolean);
 
-function clearForm() {
-  frontInput.value = "";
-  backInput.value = "";
-  hintInput.value = "";
-  tagInput.value = "";
-}
+    console.log("[Popup] Card data collected:", { front, back, hint, tags });
 
-clearButton.addEventListener("click", clearForm);
+    // validation
+    if (!front || !back) {
+      showStatus("Front and Back fields are required.", "error");
+      console.warn("[Popup] Validation Failed: Front or Back missing.");
+      return;
+    }
 
-//loading recent cards
+    // create flashcard
+    const flashcard = {
+      front,
+      back,
+      hint: hint || undefined,
+      tags,
+      createdAt: new Date().toISOString(),
+    };
 
-function loadRecentCards() {
-  browser.storage.local
-    .get({ flashcards: [] })
-    .then((result) => {
-      listCards.innerHTML = "";
+    console.log("[Popup] Saving flashcard:", flashcard);
 
-      const recentCards = result.flashcards.slice(-5).reverse(); // last 5 cards
-      recentCards.forEach((card) => {
-        const li = document.createElement("li");
-        li.textContent = `${card.front} → ${card.back}`;
-        listCards.appendChild(li);
+    //update the status and update the flashcards
+
+    browser.storage.local
+      .get({ flashcards: [] })
+      .then((result) => {
+        const updatedCards = [...result.flashcards, flashcard];
+        return browser.storage.local.set({ flashcards: updatedCards });
+      })
+      .then(() => {
+        statusMsg.textContent = "Flashcard saved!";
+        statusMsg.style.color = "#28a745";
+        clearForm();
+        loadRecentCards();
+      })
+      .catch((error) => {
+        console.error("Error saving flashcard:", error);
+        statusMsg.textContent = "Error saving flashcard!";
+        statusMsg.style.color = "red";
       });
-    })
-    .catch((error) => {
-      console.error("Error loading flashcards:", error);
-    });
-}
+  }
 
+  saveButton.addEventListener("click", saveFlashcard);
+
+  // clear form function
+
+  function clearForm() {
+    frontInput.value = "";
+    backInput.value = "";
+    hintInput.value = "";
+    tagInput.value = "";
+  }
+
+  clearButton.addEventListener("click", clearForm);
+
+  //loading recent cards
+
+  function loadRecentCards() {
+    browser.storage.local
+      .get({ flashcards: [] })
+      .then((result) => {
+        listCards.innerHTML = "";
+
+        const recentCards = result.flashcards.slice(-5).reverse(); // last 5 cards
+        recentCards.forEach((card) => {
+          const li = document.createElement("li");
+          li.textContent = `${card.front} → ${card.back}`;
+          listCards.appendChild(li);
+        });
+      })
+      .catch((error) => {
+        console.error("Error loading flashcards:", error);
+      });
+  }
+});
 //event listener
 document.addEventListener("DOMContentLoaded", loadRecentCards);
