@@ -41,7 +41,6 @@ document.addEventListener("DOMContentLoaded", () => {
   // function definitions
 
   //save flashcard
-
   function saveFlashcard() {
     console.log("[Popup] Save button clicked.");
     const front = frontInput.value.trim();
@@ -49,7 +48,6 @@ document.addEventListener("DOMContentLoaded", () => {
     const hint = hintInput.value.trim();
 
     // split tags  trim whitespace and filter out any empty strings
-
     const tags = tagsInput.value
       .split(",")
       .map((tag) => tag.trim())
@@ -75,6 +73,18 @@ document.addEventListener("DOMContentLoaded", () => {
 
     console.log("[Popup] Saving flashcard:", flashcard);
 
+    //clear form function
+    function clearForm() {
+      console.log("[Popup] Clear button clicked.");
+      frontInput.value = "";
+      backInput.value = "";
+      hintInput.value = "";
+      tagsInput.value = "";
+      statusMessage.textContent = "";
+      statusMessage.className = "status-message";
+      console.log("[Popup] Form cleared.");
+    }
+
     //update the status and update the flashcards
 
     browser.storage.local
@@ -98,17 +108,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
   saveButton.addEventListener("click", saveFlashcard);
 
-  // clear form function
-
-  function clearForm() {
-    frontInput.value = "";
-    backInput.value = "";
-    hintInput.value = "";
-    tagInput.value = "";
-  }
-
-  clearButton.addEventListener("click", clearForm);
-
   //loading recent cards
 
   function loadRecentCards() {
@@ -128,6 +127,8 @@ document.addEventListener("DOMContentLoaded", () => {
         console.error("Error loading flashcards:", error);
       });
   }
+
+  //event listeners
+  saveButton.addEventListener("click", saveFlashcard);
+  clearButton.addEventListener("click", clearForm);
 });
-//event listener
-document.addEventListener("DOMContentLoaded", loadRecentCards);
