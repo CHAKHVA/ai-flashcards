@@ -54,10 +54,15 @@ function saveFlashcard() {
     });
 }
 
-saveButton.onclick = function () {
-  console.log("save button clicked");
-};
+saveButton.addEventListener("click", saveFlashcard);
 
-clearButton.onclick = function () {
-  console.log("clear button clicked");
-};
+// clear form function
+
+function clearForm() {
+  frontInput.value = "";
+  backInput.value = "";
+  hintInput.value = "";
+  tagInput.value = "";
+}
+
+clearButton.addEventListener("click", clearForm);
