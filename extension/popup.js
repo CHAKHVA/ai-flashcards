@@ -1,3 +1,9 @@
+// compability shim
+
+if (typeof browser === "undefined") {
+  var browser = chrome;
+}
+
 //elements
 const frontInput = document.getElementById("flashcard-front");
 const backInput = document.getElementById("flashcard-back");
@@ -66,3 +72,26 @@ function clearForm() {
 }
 
 clearButton.addEventListener("click", clearForm);
+
+//loading recent cards
+
+function loadRecentCards() {
+  browser.storage.local
+    .get({ flashcards: [] })
+    .then((result) => {
+      listCards.innerHTML = "";
+
+      const recentCards = result.flashcards.slice(-5).reverse(); // last 5 cards
+      recentCards.forEach((card) => {
+        const li = document.createElement("li");
+        li.textContent = `${card.front} → ${card.back}`;
+        listCards.appendChild(li);
+      });
+    })
+    .catch((error) => {
+      console.error("Error loading flashcards:", error);
+    });
+}
+
+//event listener
+document.addEventListener("DOMContentLoaded", loadRecentCards);
