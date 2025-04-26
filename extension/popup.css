@@ -78,7 +78,7 @@ button {
   transition: background-color 0.3s, transform 0.2s;
 }
 
-/* Save button - vibrant green */
+/* Save button - blue */
 #save {
   background-color: #2a83c3;
   color: white;
@@ -89,7 +89,7 @@ button {
   transform: scale(1.05);
 }
 
-/* Clear button - red */
+/* Clear button - gray */
 #clear {
   background-color: #6d6c6c;
   color: white;
@@ -105,7 +105,7 @@ button {
   margin-top: 20px;
   text-align: center;
   font-size: 14px;
-  color: #28a745;
+  color: #559bc0;
 }
 
 /* Recent cards list */
