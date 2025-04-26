@@ -1,0 +1,124 @@
+## Phase 1: Core Structure & Basic Extension
+
+- [ ] **Step 1.1: Project Setup & Basic ADTs**
+  - [ ] Setup project: Node.js, npm/yarn, TypeScript, Git repo.
+  - [ ] Configure `tsconfig.json`.
+  - [ ] Configure testing framework (Vitest/Jest).
+  - [ ] Define/Adapt `Flashcard` ADT (id, front, back, constructor, getters, checkRep).
+  - [ ] Define/Adapt `Deck` ADT (id, name, cards array, constructor, getters, checkRep).
+  - [ ] Write basic unit tests for `Flashcard` & `Deck` constructors/getters.
+  - [ ] Ensure project compiles and tests pass.
+  - [ ] _Commit: "feat: Setup project structure and basic Flashcard/Deck ADTs with tests"_
+- [ ] **Step 1.2: Storage Module (Local Storage)**
+  - [ ] Create `storage.ts`.
+  - [ ] Implement `saveDecks(decks)` using `localStorage`.
+  - [ ] Implement `loadDecks()` using `localStorage`, handle JSON errors.
+  - [ ] Write unit tests for `saveDecks`/`loadDecks` (mock `localStorage`).
+  - [ ] _Commit: "feat: Implement localStorage module for saving/loading decks"_
+- [ ] **Step 1.3: Basic Browser Extension Manifest & Popup**
+  - [ ] Create `manifest.json` (V3, storage permission, action/popup).
+  - [ ] Create `popup.html` (front/back inputs, save button).
+  - [ ] Create empty `popup.ts` and link in HTML.
+  - [ ] Load basic extension in browser to test popup display.
+  - [ ] _Commit: "feat: Setup basic browser extension manifest and popup UI"_
+- [ ] **Step 1.4: Save Card Logic in Popup**
+  - [ ] Implement `popup.ts` event listener for save button.
+  - [ ] Read input values.
+  - [ ] Generate card ID.
+  - [ ] Use `storage.ts` to load/save decks (handle default deck).
+  - [ ] Bundle/copy necessary modules (`storage`, ADTs) for extension context.
+  - [ ] Add user feedback on save.
+  - [ ] Test saving a card via extension and check `localStorage`.
+  - [ ] _Commit: "feat: Implement card saving logic in extension popup using localStorage"_
+- [ ] **Step 1.5: Integrate Selection Capture**
+  - [ ] Update `manifest.json` (scripting, activeTab permissions).
+  - [ ] Update `popup.ts` to use `chrome.tabs.executeScript` on load.
+  - [ ] Implement injected script logic to get `window.getSelection()`.
+  - [ ] Update `popup.ts` callback to populate 'Front' field with selection result.
+  - [ ] Test selecting text on a page and opening popup.
+  - [ ] _Commit: "feat: Populate extension popup 'Front' field with selected text"_
+
+## Phase 2: Hand Gesture Recognition Setup
+
+- [ ] **Step 2.1: Webcam Access**
+  - [ ] Create `gesture_test.html` (video, status elements).
+  - [ ] Create `gesture_test.ts`.
+  - [ ] Implement `getUserMedia` logic.
+  - [ ] Display stream in video element.
+  - [ ] Handle success/error cases, update status.
+  - [ ] Test webcam access in browser.
+  - [ ] _Commit: "feat: Implement basic webcam access and display"_
+- [ ] **Step 2.2: Integrate TensorFlow.js Hand Pose Detection**
+  - [ ] Add TF.js & Hand Pose model dependencies (CDN or npm).
+  - [ ] Update `gesture_test.ts` to import TF.js modules.
+  - [ ] Load Hand Pose Detection model (`createDetector`).
+  - [ ] Implement detection loop (`estimateHands` on video).
+  - [ ] Log detected hand landmarks to console.
+  - [ ] Test model loading and hand detection.
+  - [ ] _Commit: "feat: Integrate TF.js Hand Pose Detection on webcam stream"_
+- [ ] **Step 2.3: Basic Gesture Interpretation**
+  - [ ] Create `interpretGesture(handData)` function in `gesture_test.ts`.
+  - [ ] Implement _simple_ logic for 'Thumbs Up', 'Thumbs Down', 'Flat Hand' based on landmark positions.
+  - [ ] Return gesture string ('Unknown' if none detected).
+  - [ ] Call `interpretGesture` in detection loop.
+  - [ ] Display recognized gesture string on test page.
+  - [ ] Test gesture interpretation logic (may need refinement).
+  - [ ] _Commit: "feat: Implement basic gesture interpretation (ThumbsUp/Down, FlatHand)"_
+
+## Phase 3: Integration and Main Application
+
+- [ ] **Step 3.1: Main Application UI Shell**
+  - [ ] Create `index.html` with divs for deck list, review area (card front/back, buttons), webcam, gesture status.
+  - [ ] Create basic `style.css`.
+  - [ ] Create `main.ts`.
+  - [ ] Implement deck loading (`loadDecks`) on page load.
+  - [ ] Populate deck list display.
+  - [ ] _Commit: "feat: Setup main application HTML shell and load decks"_
+- [ ] **Step 3.2: Integrate Gesture Module into Main App**
+  - [ ] Move/copy gesture logic (webcam, TF.js load, detect loop, interpret) to `main.ts` or `gesture.ts` module.
+  - [ ] Ensure webcam video and gesture status display on `index.html`.
+  - [ ] Trigger gesture detection (e.g., on page load initially).
+  - [ ] _Commit: "feat: Integrate gesture detection module into main application"_
+- [ ] **Step 3.3: Implement Card Review Logic**
+  - [ ] Define/Adapt `SpacedRepetitionScheduler` (from PS1).
+  - [ ] Implement logic to start review (get next card).
+  - [ ] Display card Front/Back in review area.
+  - [ ] Implement 'Show Answer' button logic.
+  - [ ] Implement 'Wrong'/'Hard'/'Easy' button logic (call `scheduler.updateCard`).
+  - [ ] Save changes using `storage.ts`.
+  - [ ] Load and display next card.
+  - [ ] Test review flow using buttons.
+  - [ ] _Commit: "feat: Implement core flashcard review logic with SR algorithm"_
+- [ ] **Step 3.4: Connect Gestures to Review Logic**
+  - [ ] Add state management (`isAnswerShown`, `lastGestureTime`, debounce).
+  - [ ] Trigger `isAnswerShown = true` when answer is revealed.
+  - [ ] In gesture detection loop, _if_ answer shown & debounce ok:
+    - [ ] Map recognized gesture to rating.
+    - [ ] Call `scheduler.updateCard(card, rating)`.
+    - [ ] Call `saveDecks()`.
+    - [ ] Load/display next card.
+    - [ ] Reset state (`isAnswerShown`, `lastGestureTime`).
+  - [ ] Test review flow using gestures.
+  - [ ] _Commit: "feat: Connect detected hand gestures to control card review"_
+
+## Phase 4: Refinement and Testing
+
+- [ ] **Step 4.1: Add/Improve Tests**
+  - [ ] Write/Improve unit tests for ADTs (`Flashcard`, `Deck`, `checkRep`).
+  - [ ] Write/Improve unit tests for `SpacedRepetitionScheduler`.
+  - [ ] Write/Improve unit tests for `storage.ts` (mocked).
+  - [ ] Write unit tests for `interpretGesture`.
+  - [ ] Plan/Implement integration tests (extension save/load, main app review flow).
+  - [ ] _Commit: "test: Add comprehensive unit and integration tests"_
+- [ ] **Step 4.2: Refine Gesture Recognition & Feedback**
+  - [ ] Tune `interpretGesture` logic based on testing.
+  - [ ] Improve visual feedback for detected gestures.
+  - [ ] Consider adding configuration options (sensitivity).
+  - [ ] _Commit: "refactor: Refine gesture recognition accuracy and user feedback"_
+- [ ] **Step 4.3: Code Cleanup & Documentation**
+  - [ ] Review code for SFB, ETU, RFC.
+  - [ ] Ensure AF/RI are documented for ADTs.
+  - [ ] Add necessary code comments.
+  - [ ] Ensure consistent code formatting.
+  - [ ] Final manual testing of all features.
+  - [ ] _Commit: "refactor: Code cleanup, documentation, and final review"_
