@@ -1,108 +1,128 @@
 body {
-  font-family: Arial, sans-serif;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
   margin: 0;
   padding: 20px;
-  background-color: #f5f5f5;
+  background: linear-gradient(135deg, #559bc0 0%, #71b9df 100%);
+  min-height: 100vh;
 }
 
+/* White container card */
 .container {
   max-width: 400px;
   margin: auto;
-  background: white;
-  padding: 20px;
-  border-radius: 10px;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  background: #ffffff;
+  padding: 25px;
+  border-radius: 15px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
 }
 
+/* Titles */
 h1,
 h2 {
   text-align: center;
   color: #333;
+  margin-bottom: 20px;
 }
 
-.card-form {
+/* Structure for form */
+.card-structure {
   margin-top: 20px;
 }
 
-.form-group {
+.structure-part {
   margin-bottom: 15px;
 }
 
+/* Labels */
 label {
   display: block;
   margin-bottom: 5px;
+  font-weight: bold;
   color: #555;
 }
 
-textarea,
-input[type="text"] {
-  width: 100%;
-  padding: 8px;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-  resize: vertical;
-  font-size: 14px;
-  box-sizing: border-box;
-}
-
+/* Inputs and Textareas */
 textarea {
-  min-height: 60px;
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  font-size: 14px;
+  resize: vertical;
+  box-sizing: border-box;
+  transition: border 0.2s ease;
 }
 
-.buttons {
+textarea:focus {
+  border: 1px solid #b675d6;
+  outline: none;
+}
+
+/* Buttons container */
+.button {
   display: flex;
   justify-content: space-between;
-  margin-top: 15px;
+  gap: 12px;
+  margin-top: 20px;
 }
 
+/* Buttons */
 button {
-  padding: 10px 20px;
+  flex: 1;
+  padding: 12px 0;
+  font-size: 15px;
+  font-weight: bold;
   border: none;
-  border-radius: 5px;
-  font-size: 14px;
+  border-radius: 8px;
   cursor: pointer;
-  transition: background-color 0.2s ease;
+  transition: background-color 0.3s, transform 0.2s;
 }
 
-.primary-btn {
-  background-color: #4caf50;
+/* Save button - vibrant green */
+#save {
+  background-color: #2a83c3;
   color: white;
 }
 
-.primary-btn:hover {
-  background-color: #45a049;
+#save:hover {
+  background-color: #184667;
+  transform: scale(1.05);
 }
 
-.secondary-btn {
-  background-color: #f0f0f0;
-  color: #333;
+/* Clear button - red */
+#clear {
+  background-color: #6d6c6c;
+  color: white;
 }
 
-.secondary-btn:hover {
-  background-color: #e0e0e0;
+#clear:hover {
+  background-color: #464344;
+  transform: scale(1.05);
 }
 
-.status-message {
-  margin-top: 15px;
+/* Status message */
+.status-msg {
+  margin-top: 20px;
   text-align: center;
   font-size: 14px;
-  color: #4caf50;
+  color: #28a745;
 }
 
+/* Recent cards list */
 .recent-cards {
-  margin-top: 25px;
+  margin-top: 30px;
 }
 
-#recent-cards-list {
-  list-style-type: none;
+#list-cards {
+  list-style: none;
   padding: 0;
 }
 
-#recent-cards-list li {
-  background: #fafafa;
+#list-cards li {
+  background: #f8f9fa;
   margin-bottom: 10px;
   padding: 10px;
-  border-left: 4px solid #4caf50;
+  border-left: 4px solid #559bc0;
   border-radius: 5px;
   font-size: 14px;
 }
