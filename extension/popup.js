@@ -1,11 +1,9 @@
 // compability shim
-
 if (typeof browser === "undefined") {
   var browser = chrome;
 }
 
 // wait until the initial HTML document is fully loaded and parsed
-
 document.addEventListener("DOMContentLoaded", () => {
   console.log("[Popup] DOM content loaded.");
 
@@ -29,10 +27,8 @@ document.addEventListener("DOMContentLoaded", () => {
     console.error("[Popup] Critical DOM elements not found!");
 
     //display an error to the user in the popup itself
-
     statusMessage.textContent = "error initializing popup elements.";
     statusMessage.style.color = "red";
-
     return; // stop execution if essential elements are missing
   }
 
@@ -73,59 +69,72 @@ document.addEventListener("DOMContentLoaded", () => {
 
     console.log("[Popup] Saving flashcard:", flashcard);
 
-    //clear form function
-    function clearForm() {
-      console.log("[Popup] Clear button clicked.");
-      frontInput.value = "";
-      backInput.value = "";
-      hintInput.value = "";
-      tagsInput.value = "";
-      statusMessage.textContent = "";
-      statusMessage.className = "status-message";
-      console.log("[Popup] Form cleared.");
-    }
-
-    //update the status and update the flashcards
-
+    //save card to storage
     browser.storage.local
       .get({ flashcards: [] })
       .then((result) => {
         const updatedCards = [...result.flashcards, flashcard];
+
+        console.log(
+          `[Popup] Saving ${updatedCards.length} total cards to local storage.`
+        );
         return browser.storage.local.set({ flashcards: updatedCards });
       })
       .then(() => {
-        statusMsg.textContent = "Flashcard saved!";
-        statusMsg.style.color = "#28a745";
+        console.log("[Popup] Flashcard saved successfully to local storage.");
+        showStatus("Flashcard saved!", "success");
         clearForm();
         loadRecentCards();
+        sendFlashcardToBackend(flashcard);
       })
       .catch((error) => {
-        console.error("Error saving flashcard:", error);
-        statusMsg.textContent = "Error saving flashcard!";
-        statusMsg.style.color = "red";
+        console.error(
+          "[Popup] Error saving flashcard to local storage:",
+          error
+        );
+        showStatus(
+          `Error saving flashcard locally: ${error.message || error}`,
+          "error"
+        );
       });
   }
 
-  saveButton.addEventListener("click", saveFlashcard);
+  //clear form function
+  function clearForm() {
+    console.log("[Popup] Clear button clicked.");
+    frontInput.value = "";
+    backInput.value = "";
+    hintInput.value = "";
+    tagsInput.value = "";
+    statusMessage.textContent = "";
+    statusMessage.className = "status-message";
+    console.log("[Popup] Form cleared.");
+  }
 
-  //loading recent cards
+  //display status to user
+  function showStatus(message, type = "info") {
+    console.log(`[Popup Status] ${type}: ${message}`);
+    statusMessage.textContent = message;
+    statusMessage.className = `status-message ${type}`;
 
-  function loadRecentCards() {
-    browser.storage.local
-      .get({ flashcards: [] })
-      .then((result) => {
-        listCards.innerHTML = "";
+    switch (type) {
+      case "success":
+        statusMessage.style.color = "#28a745";
+        break;
+      case "error":
+        statusMessage.style.color = "red";
+        break;
+      default:
+        statusMessage.style.color = "black";
+        break;
+    }
 
-        const recentCards = result.flashcards.slice(-5).reverse(); // last 5 cards
-        recentCards.forEach((card) => {
-          const li = document.createElement("li");
-          li.textContent = `${card.front} → ${card.back}`;
-          listCards.appendChild(li);
-        });
-      })
-      .catch((error) => {
-        console.error("Error loading flashcards:", error);
-      });
+    // Clear the message after 3 seconds
+    setTimeout(() => {
+      statusMessage.textContent = "";
+      statusMessage.className = "status-message";
+      statusMessage.style.color = "";
+    }, 3000);
   }
 
   //event listeners
