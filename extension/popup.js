@@ -137,6 +137,48 @@ document.addEventListener("DOMContentLoaded", () => {
     }, 3000);
   }
 
+  const BACKEND_URL = ""; //here i will add backend endpoint after we have it in the project
+
+  //send flashcard information to backend
+
+  async function sendFlashcardToBackend(flashcard) {
+    console.log("[Popup] Attempting to send flashcard to backend:", flashcard);
+    //will replace with the api endpoint at some point
+    if (BACKEND_URL === "BACKEND_API_ENDPOINT") {
+      console.warn(
+        "[Popup] BACKEND_URL is not configured. Skipping backend sync."
+      );
+      return;
+    }
+
+    try {
+      const response = await fetch(BACKEND_URL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(flashcard),
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error(
+          "[Popup] Backend sync failed:",
+          response.status,
+          response.statusText,
+          errorText
+        );
+      } else {
+        console.log("[Popup] Flashcard successfully sent to backend.");
+      }
+    } catch (error) {
+      console.error(
+        "[Popup] Network error sending flashcard to backend:",
+        error
+      );
+    }
+  }
+
   //event listeners
   saveButton.addEventListener("click", saveFlashcard);
   clearButton.addEventListener("click", clearForm);
