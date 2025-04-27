@@ -15,7 +15,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const saveButton = document.getElementById("save");
   const clearButton = document.getElementById("clear");
   const statusMessage = document.getElementById("status-msg");
-  const recentCardsList = document.getElementById("recent-cards");
+  const recentCardsList = document.getElementById("list-cards");
 
   if (
     !frontInput ||
