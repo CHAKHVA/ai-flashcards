@@ -1,0 +1,10 @@
+{
+  "manifest_version": 3,
+  "name": "Flashcard Creator",
+  "version": "1.0",
+  "description": "Create flashcards easily from any webpage.",
+  "action": {
+    "default_popup": "popup.html"
+  },
+  "permissions": []
+}
