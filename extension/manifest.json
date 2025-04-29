@@ -3,7 +3,11 @@
   "name": "Flashcard Creator",
   "version": "1.0",
   "description": "Create flashcards easily from any webpage.",
-  "permissions": ["storage", "activeTab", "scripting"],
+  "permissions": [
+    "storage",
+    "activeTab",
+    "scripting"
+  ],
   "action": {
     "default_popup": "popup/popup.html"
   },
@@ -18,7 +22,11 @@
   "host_permissions": ["<all_urls>"],
   "web_accessible_resources": [
     {
-      "resources": ["popup/popup.html"],
+      "resources": [
+        "popup/popup.html",
+        "popup/popup.css",
+        "popup/popup.js"
+      ],
       "matches": ["<all_urls>"]
     }
   ]
