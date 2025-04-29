@@ -5,6 +5,7 @@ export interface Flashcard {
   back: string;
   hint?: string;
   tags?: string[];
+  bucket: number; 
 }
 
 const FLASHCARDS_KEY = "flashcards";
@@ -13,9 +14,14 @@ export function loadFlashcards(): Flashcard[] {
   const data = localStorage.getItem(FLASHCARDS_KEY);
   if (data) {
     try {
-      return JSON.parse(data) as Flashcard[];
+      const parsed = JSON.parse(data) as Flashcard[];
+
+      return parsed.map(card => ({
+        ...card,
+        bucket: card.bucket ?? 0,
+      }));
     } catch (e) {
-      console.error("Failed to parse flashcards from localStorage", e);
+      console.error("Error parsing flashcards from localStorage:", e);
       return [];
     }
   }
@@ -24,10 +30,4 @@ export function loadFlashcards(): Flashcard[] {
 
 export function saveFlashcards(flashcards: Flashcard[]): void {
   localStorage.setItem(FLASHCARDS_KEY, JSON.stringify(flashcards));
-}
-
-export function addFlashcard(flashcard: Flashcard): void {
-  const flashcards = loadFlashcards();
-  flashcards.push(flashcard);
-  saveFlashcards(flashcards);
 }
