@@ -3,11 +3,23 @@ if (typeof browser === "undefined") {
   var browser = chrome;
 }
 
+let backInputValue = "";
+
+window.addEventListener("message", (event) => {
+  if (event.data?.type === "setSelectedText") {
+    const text = event.data.text;
+    console.log("Received selected text:", text);
+    document.getElementById("flashcard-back").value = text;
+    // Do something with it
+  }
+});
+
 // wait until the initial HTML document is fully loaded and parsed
 document.addEventListener("DOMContentLoaded", () => {
   console.log("[Popup] DOM content loaded.");
 
   // dom elements
+
   const frontInput = document.getElementById("flashcard-front");
   const backInput = document.getElementById("flashcard-back");
   const hintInput = document.getElementById("flashcard-hint");
@@ -15,8 +27,9 @@ document.addEventListener("DOMContentLoaded", () => {
   const saveButton = document.getElementById("save");
   const clearButton = document.getElementById("clear");
   const statusMessage = document.getElementById("status-msg");
-  const recentCardsList = document.getElementById("list-cards");
+  const recentCardsList = document.getElementById("list-cards"); // This is where recent cards will be displayed
 
+  // Check if all required elements are loaded
   if (
     !frontInput ||
     !backInput ||
@@ -25,59 +38,74 @@ document.addEventListener("DOMContentLoaded", () => {
     !recentCardsList
   ) {
     console.error("[Popup] Critical DOM elements not found!");
-
-    //display an error to the user in the popup itself
-    statusMessage.textContent = "error initializing popup elements.";
+    // Display an error to the user in the popup itself
+    statusMessage.textContent = "Error initializing popup elements.";
     statusMessage.style.color = "red";
-    return; // stop execution if essential elements are missing
+    return; // Stop execution if essential elements are missing
   }
 
   console.log("[Popup] DOM elements initialized successfully.");
+  console.log("[Popup] DOM elements initialized successfully."); // Load recent cards when the popup opens
 
-  // function definitions
+  // Function to load recent flashcards
+  loadRecentCards();
 
-  //save flashcard
+  // Request highlighted text from the background script on popup load
+  console.log("[Popup] Requesting highlighted text from background.");
+  browser.runtime.sendMessage({ type: "GET_HIGHLIGHTED_TEXT" }, (response) => {
+    if (chrome.runtime.lastError) {
+      console.error(
+        "[Popup] Error getting highlighted text:",
+        chrome.runtime.lastError.message
+      );
+      return;
+    }
+
+    console.log("[Popup] Received response from background:", response);
+    if (response && response.text) {
+      console.log("[Popup] Pre-filling back input with:", response.text);
+      backInput.value = response.text;
+    } else {
+      console.log("[Popup] No highlighted text available from background.");
+    }
+  });
+
+  // Function to save flashcard
   function saveFlashcard() {
     console.log("[Popup] Save button clicked.");
     const front = frontInput.value.trim();
     const back = backInput.value.trim();
     const hint = hintInput.value.trim();
 
-    // split tags  trim whitespace and filter out any empty strings
+    // Split tags, trim whitespace, and filter out any empty strings
     const tags = tagsInput.value
       .split(",")
       .map((tag) => tag.trim())
       .filter(Boolean);
 
-    console.log("[Popup] Card data collected:", { front, back, hint, tags });
-
-    // validation
+    // Validation
     if (!front || !back) {
       showStatus("Front and Back fields are required.", "error");
       console.warn("[Popup] Validation Failed: Front or Back missing.");
       return;
     }
 
-    // create flashcard
+    // Create flashcard object
     const flashcard = {
       front,
       back,
-      hint: hint || undefined,
+      hint: hint || undefined, // Store undefined if hint is empty
       tags,
-      createdAt: new Date().toISOString(),
+      createdAt: new Date().toISOString(), // Add timestamp for sorting
     };
 
     console.log("[Popup] Saving flashcard:", flashcard);
 
-    //save card to storage
+    // Save card to local storage
     browser.storage.local
       .get({ flashcards: [] })
       .then((result) => {
         const updatedCards = [...result.flashcards, flashcard];
-
-        console.log(
-          `[Popup] Saving ${updatedCards.length} total cards to local storage.`
-        );
         return browser.storage.local.set({ flashcards: updatedCards });
       })
       .then(() => {
@@ -99,19 +127,63 @@ document.addEventListener("DOMContentLoaded", () => {
       });
   }
 
-  //clear form function
+  // Function to load and display recent flashcards
+  function loadRecentCards() {
+    console.log("[Popup] Loading recent flashcards from local storage.");
+    browser.storage.local
+      .get({ flashcards: [] })
+      .then((result) => {
+        const flashcards = result.flashcards; // Sort by createdAt timestamp descending (newest first)
+
+        flashcards.sort(
+          (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+        ); // Get the 5 most recent cards
+
+        const recentCards = flashcards.slice(0, 5); // Display up to 5 recent cards
+
+        console.log(
+          `[Popup] Found ${flashcards.length} total cards, displaying ${recentCards.length} recent ones.`
+        );
+
+        // Clear the current list
+        recentCardsList.innerHTML = "";
+
+        if (recentCards.length === 0) {
+          const listItem = document.createElement("li");
+          listItem.textContent = "No recent flashcards yet.";
+          listItem.style.fontStyle = "italic";
+          recentCardsList.appendChild(listItem);
+        } else {
+          recentCards.forEach((card) => {
+            const listItem = document.createElement("li"); // Display front and back
+            listItem.innerHTML = `<strong>Q:</strong> ${escapeHTML(
+              card.front
+            )}<br><strong>A:</strong> ${escapeHTML(card.back)}`;
+            recentCardsList.appendChild(listItem);
+          });
+        }
+      })
+      .catch((error) => {
+        console.error("[Popup] Error loading recent flashcards:", error);
+        recentCardsList.innerHTML = "<li>Error loading recent cards.</li>";
+      });
+  }
+
+  // Clear form function
   function clearForm() {
     console.log("[Popup] Clear button clicked.");
     frontInput.value = "";
     backInput.value = "";
     hintInput.value = "";
     tagsInput.value = "";
+    if (hintInput) hintInput.value = "";
+    if (tagsInput) tagsInput.value = "";
     statusMessage.textContent = "";
     statusMessage.className = "status-message";
     console.log("[Popup] Form cleared.");
   }
 
-  //display status to user
+  // Display status to user
   function showStatus(message, type = "info") {
     console.log(`[Popup Status] ${type}: ${message}`);
     statusMessage.textContent = message;
@@ -119,13 +191,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
     switch (type) {
       case "success":
-        statusMessage.style.color = "#28a745";
+        statusMessage.style.color = "#28a745"; // Green
         break;
       case "error":
         statusMessage.style.color = "red";
         break;
       default:
-        statusMessage.style.color = "black";
+        statusMessage.style.color = "black"; // Reset to default/CSS color
         break;
     }
 
@@ -134,16 +206,16 @@ document.addEventListener("DOMContentLoaded", () => {
       statusMessage.textContent = "";
       statusMessage.className = "status-message";
       statusMessage.style.color = "";
+      statusMessage.className = "status-message"; // Reset class
+      statusMessage.style.color = ""; // Reset color
     }, 3000);
   }
 
-  const BACKEND_URL = ""; //here i will add backend endpoint after we have it in the project
+  const BACKEND_URL = ""; // Here I will add the backend endpoint after we have it in the project
 
-  //send flashcard information to backend
-
+  // Send flashcard information to backend
   async function sendFlashcardToBackend(flashcard) {
     console.log("[Popup] Attempting to send flashcard to backend:", flashcard);
-    //will replace with the api endpoint at some point
     if (BACKEND_URL === "BACKEND_API_ENDPOINT") {
       console.warn(
         "[Popup] BACKEND_URL is not configured. Skipping backend sync."
@@ -179,7 +251,14 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  //event listeners
+  // Simple helper function to prevent basic XSS when displaying user input
+  function escapeHTML(str) {
+    const div = document.createElement("div");
+    div.appendChild(document.createTextNode(str));
+    return div.innerHTML;
+  }
+
+  // Event listeners
   saveButton.addEventListener("click", saveFlashcard);
   clearButton.addEventListener("click", clearForm);
 });
