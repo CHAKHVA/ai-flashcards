@@ -1,0 +1,128 @@
+body {
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  margin: 0;
+  padding: 20px;
+  background: linear-gradient(135deg, #559bc0 0%, #71b9df 100%);
+  min-height: 100vh;
+}
+
+/* White container card */
+.container {
+  max-width: 400px;
+  margin: auto;
+  background: #ffffff;
+  padding: 25px;
+  border-radius: 15px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+}
+
+/* Titles */
+h1,
+h2 {
+  text-align: center;
+  color: #333;
+  margin-bottom: 20px;
+}
+
+/* Structure for form */
+.card-structure {
+  margin-top: 20px;
+}
+
+.structure-part {
+  margin-bottom: 15px;
+}
+
+/* Labels */
+label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: bold;
+  color: #555;
+}
+
+/* Inputs and Textareas */
+textarea {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  font-size: 14px;
+  resize: vertical;
+  box-sizing: border-box;
+  transition: border 0.2s ease;
+}
+
+textarea:focus {
+  border: 1px solid #b675d6;
+  outline: none;
+}
+
+/* Buttons container */
+.button {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+/* Buttons */
+button {
+  flex: 1;
+  padding: 12px 0;
+  font-size: 15px;
+  font-weight: bold;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.3s, transform 0.2s;
+}
+
+/* Save button - blue */
+#save {
+  background-color: #2a83c3;
+  color: white;
+}
+
+#save:hover {
+  background-color: #184667;
+  transform: scale(1.05);
+}
+
+/* Clear button - gray */
+#clear {
+  background-color: #6d6c6c;
+  color: white;
+}
+
+#clear:hover {
+  background-color: #464344;
+  transform: scale(1.05);
+}
+
+/* Status message */
+.status-msg {
+  margin-top: 20px;
+  text-align: center;
+  font-size: 14px;
+  color: #559bc0;
+}
+
+/* Recent cards list */
+.recent-cards {
+  margin-top: 30px;
+}
+
+#list-cards {
+  list-style: none;
+  padding: 0;
+}
+
+#list-cards li {
+  background: #f8f9fa;
+  margin-bottom: 10px;
+  padding: 10px;
+  border-left: 4px solid #559bc0;
+  border-radius: 5px;
+  font-size: 14px;
+}
