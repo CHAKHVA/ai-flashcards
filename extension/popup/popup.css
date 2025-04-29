@@ -6,7 +6,6 @@ body {
   min-height: 100vh;
 }
 
-/* White container card */
 .container {
   max-width: 1000px;
   margin: auto;
@@ -18,7 +17,6 @@ body {
   min-height: 300px;
 }
 
-/* Titles */
 h1,
 h2 {
   text-align: center;
@@ -26,7 +24,6 @@ h2 {
   margin-bottom: 20px;
 }
 
-/* Structure for form */
 .card-structure {
   margin-top: 20px;
 }
@@ -35,7 +32,6 @@ h2 {
   margin-bottom: 15px;
 }
 
-/* Labels */
 label {
   display: block;
   margin-bottom: 5px;
@@ -43,7 +39,6 @@ label {
   color: #555;
 }
 
-/* Inputs and Textareas */
 textarea {
   width: 100%;
   padding: 10px;
@@ -60,7 +55,6 @@ textarea:focus {
   outline: none;
 }
 
-/* Buttons container */
 .button {
   display: flex;
   justify-content: space-between;
@@ -68,7 +62,6 @@ textarea:focus {
   margin-top: 20px;
 }
 
-/* Buttons */
 button {
   flex: 1;
   padding: 12px 0;
@@ -80,7 +73,6 @@ button {
   transition: background-color 0.3s, transform 0.2s;
 }
 
-/* Save button - blue */
 #save {
   background-color: #2a83c3;
   color: white;
@@ -91,7 +83,6 @@ button {
   transform: scale(1.05);
 }
 
-/* Clear button - gray */
 #clear {
   background-color: #6d6c6c;
   color: white;
@@ -102,7 +93,6 @@ button {
   transform: scale(1.05);
 }
 
-/* Status message */
 .status-msg {
   margin-top: 20px;
   text-align: center;
@@ -110,7 +100,6 @@ button {
   color: #559bc0;
 }
 
-/* Recent cards list */
 .recent-cards {
   margin-top: 30px;
 }

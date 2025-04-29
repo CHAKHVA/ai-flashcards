@@ -1,16 +1,12 @@
-// compability shim
 if (typeof browser === "undefined") {
   var browser = chrome;
 }
-
-let backInputValue = "";
 
 window.addEventListener("message", (event) => {
   if (event.data?.type === "setSelectedText") {
     const text = event.data.text;
     console.log("Received selected text:", text);
     document.getElementById("flashcard-back").value = text;
-    // Do something with it
   }
 });
 
@@ -19,7 +15,6 @@ document.addEventListener("DOMContentLoaded", () => {
   console.log("[Popup] DOM content loaded.");
 
   // dom elements
-
   const frontInput = document.getElementById("flashcard-front");
   const backInput = document.getElementById("flashcard-back");
   const hintInput = document.getElementById("flashcard-hint");
@@ -27,37 +22,26 @@ document.addEventListener("DOMContentLoaded", () => {
   const saveButton = document.getElementById("save");
   const clearButton = document.getElementById("clear");
   const statusMessage = document.getElementById("status-msg");
-  const recentCardsList = document.getElementById("list-cards"); // This is where recent cards will be displayed
+  const recentCardsList = document.getElementById("list-cards");
 
   // Check if all required elements are loaded
-  if (
-    !frontInput ||
-    !backInput ||
-    !saveButton ||
-    !statusMessage ||
-    !recentCardsList
-  ) {
+  if (!frontInput || !backInput || !saveButton || !statusMessage || !recentCardsList) {
     console.error("[Popup] Critical DOM elements not found!");
-    // Display an error to the user in the popup itself
     statusMessage.textContent = "Error initializing popup elements.";
     statusMessage.style.color = "red";
-    return; // Stop execution if essential elements are missing
+    return;
   }
 
   console.log("[Popup] DOM elements initialized successfully.");
-  console.log("[Popup] DOM elements initialized successfully."); // Load recent cards when the popup opens
 
-  // Function to load recent flashcards
+  // Load recent cards when the popup opens
   loadRecentCards();
 
   // Request highlighted text from the background script on popup load
   console.log("[Popup] Requesting highlighted text from background.");
   browser.runtime.sendMessage({ type: "GET_HIGHLIGHTED_TEXT" }, (response) => {
     if (chrome.runtime.lastError) {
-      console.error(
-        "[Popup] Error getting highlighted text:",
-        chrome.runtime.lastError.message
-      );
+      console.error("[Popup] Error getting highlighted text:", chrome.runtime.lastError.message);
       return;
     }
 
@@ -94,9 +78,9 @@ document.addEventListener("DOMContentLoaded", () => {
     const flashcard = {
       front,
       back,
-      hint: hint || undefined, // Store undefined if hint is empty
+      hint: hint || undefined,
       tags,
-      createdAt: new Date().toISOString(), // Add timestamp for sorting
+      createdAt: new Date().toISOString(),
     };
 
     console.log("[Popup] Saving flashcard:", flashcard);
@@ -116,14 +100,8 @@ document.addEventListener("DOMContentLoaded", () => {
         sendFlashcardToBackend(flashcard);
       })
       .catch((error) => {
-        console.error(
-          "[Popup] Error saving flashcard to local storage:",
-          error
-        );
-        showStatus(
-          `Error saving flashcard locally: ${error.message || error}`,
-          "error"
-        );
+        console.error("[Popup] Error saving flashcard to local storage:", error);
+        showStatus(`Error saving flashcard locally: ${error.message || error}`, "error");
       });
   }
 
@@ -133,19 +111,12 @@ document.addEventListener("DOMContentLoaded", () => {
     browser.storage.local
       .get({ flashcards: [] })
       .then((result) => {
-        const flashcards = result.flashcards; // Sort by createdAt timestamp descending (newest first)
+        const flashcards = result.flashcards;
+        flashcards.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+        const recentCards = flashcards.slice(0, 5);
 
-        flashcards.sort(
-          (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
-        ); // Get the 5 most recent cards
+        console.log(`[Popup] Found ${flashcards.length} total cards, displaying ${recentCards.length} recent ones.`);
 
-        const recentCards = flashcards.slice(0, 5); // Display up to 5 recent cards
-
-        console.log(
-          `[Popup] Found ${flashcards.length} total cards, displaying ${recentCards.length} recent ones.`
-        );
-
-        // Clear the current list
         recentCardsList.innerHTML = "";
 
         if (recentCards.length === 0) {
@@ -155,10 +126,8 @@ document.addEventListener("DOMContentLoaded", () => {
           recentCardsList.appendChild(listItem);
         } else {
           recentCards.forEach((card) => {
-            const listItem = document.createElement("li"); // Display front and back
-            listItem.innerHTML = `<strong>Q:</strong> ${escapeHTML(
-              card.front
-            )}<br><strong>A:</strong> ${escapeHTML(card.back)}`;
+            const listItem = document.createElement("li");
+            listItem.innerHTML = `<strong>Q:</strong> ${escapeHTML(card.front)}<br><strong>A:</strong> ${escapeHTML(card.back)}`;
             recentCardsList.appendChild(listItem);
           });
         }
@@ -176,50 +145,51 @@ document.addEventListener("DOMContentLoaded", () => {
     backInput.value = "";
     hintInput.value = "";
     tagsInput.value = "";
-    if (hintInput) hintInput.value = "";
-    if (tagsInput) tagsInput.value = "";
     statusMessage.textContent = "";
     statusMessage.className = "status-message";
     console.log("[Popup] Form cleared.");
   }
 
+  let statusTimeout = null;
+
   // Display status to user
   function showStatus(message, type = "info") {
     console.log(`[Popup Status] ${type}: ${message}`);
+    
+    // Clear any existing timeout
+    if (statusTimeout) {
+      clearTimeout(statusTimeout);
+    }
+
     statusMessage.textContent = message;
     statusMessage.className = `status-message ${type}`;
 
     switch (type) {
       case "success":
-        statusMessage.style.color = "#28a745"; // Green
+        statusMessage.style.color = "#28a745";
         break;
       case "error":
         statusMessage.style.color = "red";
         break;
       default:
-        statusMessage.style.color = "black"; // Reset to default/CSS color
+        statusMessage.style.color = "black";
         break;
     }
 
-    // Clear the message after 3 seconds
-    setTimeout(() => {
+    // Set new timeout
+    statusTimeout = setTimeout(() => {
       statusMessage.textContent = "";
       statusMessage.className = "status-message";
       statusMessage.style.color = "";
-      statusMessage.className = "status-message"; // Reset class
-      statusMessage.style.color = ""; // Reset color
     }, 3000);
   }
 
-  const BACKEND_URL = ""; // Here I will add the backend endpoint after we have it in the project
+  const BACKEND_URL = "";
 
   // Send flashcard information to backend
   async function sendFlashcardToBackend(flashcard) {
-    console.log("[Popup] Attempting to send flashcard to backend:", flashcard);
-    if (BACKEND_URL === "BACKEND_API_ENDPOINT") {
-      console.warn(
-        "[Popup] BACKEND_URL is not configured. Skipping backend sync."
-      );
+    if (!BACKEND_URL) {
+      console.warn("[Popup] BACKEND_URL is not configured. Skipping backend sync.");
       return;
     }
 
@@ -234,20 +204,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
       if (!response.ok) {
         const errorText = await response.text();
-        console.error(
-          "[Popup] Backend sync failed:",
-          response.status,
-          response.statusText,
-          errorText
-        );
+        console.error("[Popup] Backend sync failed:", response.status, response.statusText, errorText);
       } else {
         console.log("[Popup] Flashcard successfully sent to backend.");
       }
     } catch (error) {
-      console.error(
-        "[Popup] Network error sending flashcard to backend:",
-        error
-      );
+      console.error("[Popup] Network error sending flashcard to backend:", error);
     }
   }
 

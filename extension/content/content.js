@@ -1,4 +1,3 @@
-// Compatibility shim
 if (typeof browser === "undefined") {
   var browser = chrome;
 }
@@ -80,7 +79,7 @@ function injectAddButton(x, y, selectedText) {
 function injectPopup(x, y, selectedText) {
   const iframe = document.createElement("iframe");
   iframe.id = POPUP_IFRAME_ID;
-  iframe.src = chrome.runtime.getURL("popup.html"); // Load the popup.html
+  iframe.src = chrome.runtime.getURL("popup/popup.html"); // Load the popup.html
   iframe.style.position = "absolute";
   iframe.style.left = `${x}px`;
   iframe.style.top = `${y + 35}px`; // Adjust the offset
@@ -96,7 +95,7 @@ function injectPopup(x, y, selectedText) {
   iframe.onload = function () {
     iframe.contentWindow.postMessage(
       { type: "setSelectedText", text: selectedText },
-      "*"
+      "*",
     );
   };
 }
