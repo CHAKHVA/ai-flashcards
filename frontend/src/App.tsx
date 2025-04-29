@@ -1,5 +1,7 @@
+import FlashcardDisplay from "./components/FlashcardDisplay/FlashcardDisplay";
+
 function App() {
-  return <div>Hello World</div>;
+  return <FlashcardDisplay />;
 }
 
 export default App;
