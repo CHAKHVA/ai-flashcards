@@ -27,6 +27,13 @@ const GestureDetector: React.FC<GestureDetectorProps> = ({ onGestureDetected, is
         if (!isActive) {
             resetGestureDetection();
             gestureTriggeredRef.current = false;
+            if (animationFrameRef.current) {
+                cancelAnimationFrame(animationFrameRef.current);
+                animationFrameRef.current = undefined;
+            }
+        } else {
+            resetGestureDetection();
+            gestureTriggeredRef.current = false;
         }
     }, [isActive]);
 
@@ -154,11 +161,11 @@ const GestureDetector: React.FC<GestureDetectorProps> = ({ onGestureDetected, is
     };
 
     const handleGestureDetection = (gesture: Gesture) => {
-        if (!isActive || gestureTriggeredRef.current) {
+        if (!isActive) {
             return;
         }
 
-        if (gesture !== detectedGesture) {
+        if (gesture !== detectedGesture || gesture === null) {
             setDetectedGesture(gesture);
             setIsHolding(false);
             setHoldProgress(0);
@@ -166,7 +173,7 @@ const GestureDetector: React.FC<GestureDetectorProps> = ({ onGestureDetected, is
             return;
         }
 
-        if (gesture === null) {
+        if (gestureTriggeredRef.current) {
             return;
         }
 
@@ -179,11 +186,16 @@ const GestureDetector: React.FC<GestureDetectorProps> = ({ onGestureDetected, is
         const progress = Math.min(holdTime / 3000, 1);
         setHoldProgress(progress);
 
-        if (holdTime >= 3000 && !gestureTriggeredRef.current) {
+        if (holdTime >= 3000) {
+            console.log("GESTURE HELD FOR 3 SECONDS:", gesture);
             gestureTriggeredRef.current = true;
+
             if (onGestureDetected) {
-                onGestureDetected(gesture);
+                setTimeout(() => {
+                    onGestureDetected(gesture);
+                }, 0);
             }
+
             setDebugInfo(`GESTURE RECOGNIZED: ${gesture} - Callback triggered!`);
         }
     };
@@ -229,7 +241,10 @@ const GestureDetector: React.FC<GestureDetectorProps> = ({ onGestureDetected, is
                                     <div className="detected-gesture">{getGestureLabel(detectedGesture)}</div>
                                     {isHolding && (
                                         <div className="hold-instruction">
-                                            Hold position to confirm ({Math.ceil(holdProgress * 3)}s)
+                                            <div className="countdown-timer">
+                                                {Math.ceil(3 - (holdProgress * 3))}
+                                            </div>
+                                            Hold position to confirm
                                         </div>
                                     )}
                                 </>

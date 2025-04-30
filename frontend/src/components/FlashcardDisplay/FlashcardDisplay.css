@@ -120,19 +120,18 @@ body {
 }
 
 .rating-feedback {
-  margin-top: 1rem;
-  padding: 1rem;
-  background-color: #f9f9f9;
-  border-radius: 8px;
-  text-align: center;
-  font-size: 1.2rem;
-  animation: fadeIn 0.5s ease-in;
+  margin: 15px 0;
+  padding: 10px;
+  background-color: rgba(76, 175, 80, 0.1);
+  border: 1px solid rgba(76, 175, 80, 0.3);
+  border-radius: 5px;
+  font-size: 1.1rem;
+  line-height: 1.5;
 }
 
 .rating-feedback strong {
-  display: block;
-  font-size: 1.5rem;
-  margin: 0.5rem 0;
+  color: #4CAF50;
+  font-size: 1.2rem;
 }
 
 @keyframes fadeIn {
@@ -146,13 +145,14 @@ body {
 }
 
 .gesture-status {
-  margin-top: 0.5rem;
-  padding: 0.5rem;
-  background-color: #e0f7fa;
-  border-radius: 12px;
-  font-size: 0.9rem;
-  color: #0277bd;
-  display: inline-block;
+  margin: 15px 0;
+  font-size: 1.1rem;
+  color: #2196F3;
+  font-weight: bold;
+  padding: 8px;
+  border-radius: 5px;
+  background-color: rgba(33, 150, 243, 0.1);
+  border: 1px solid rgba(33, 150, 243, 0.3);
 }
 
 .debug-message {

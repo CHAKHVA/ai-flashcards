@@ -50,53 +50,65 @@ const Flashcard: React.FC = () => {
     setDebugMessage('Moving to next card...');
     console.log("Moving to next card from", cardIndex, "of", flashcards.length);
 
-    setTimeout(() => {
-      if (cardIndex < flashcards.length - 1) {
-        setCardIndex(prev => prev + 1);
-        setStep('question');
-      } else {
-        setStep('start');
-      }
-      setShowHint(false);
-      setLastRating(null);
-    }, 500); // Short delay to ensure state updates properly
+    if (cardIndex < flashcards.length - 1) {
+      setCardIndex(prev => prev + 1);
+      setStep('question');
+    } else {
+      setStep('start');
+    }
+    setShowHint(false);
+    setLastRating(null);
   }, [cardIndex, flashcards.length]);
 
-  // FIX: Completely rebuilt gesture handler to be more direct
+  // FIX: Improved gesture handler
   const handleGestureDetected = useCallback((gesture: Gesture) => {
-    console.log('RECEIVED GESTURE EVENT (after 3s hold):', gesture);
-    setDebugMessage(`Held gesture detected: ${gesture}`);
+    console.log('RECEIVED GESTURE EVENT:', gesture);
 
-    // Only process if we're in answer mode
+    // Don't process if not in answer mode
     if (step !== 'answer') {
       console.log('Ignoring gesture - not in answer mode', step);
       return;
     }
 
-    // Rating is always 'hard' when triggered by the 3-second hold via GestureDetector
-    const rating: 'hard' = 'hard'; // Directly assign 'hard'
+    // Don't process if gesture detection is not active
+    if (!isGestureActive) {
+      console.log('Ignoring gesture - rating already applied or detection inactive');
+      return;
+    }
 
-    console.log(`Rating card as ${rating} due to 3-second hold`);
-    setDebugMessage(`Rating: ${rating} (Hold)`);
+    let rating: 'easy' | 'hard' | 'wrong' | null = null;
 
-    // Disable gesture detection
-    setIsGestureActive(false);
+    if (gesture === 'thumbsUp') {
+      rating = 'easy';
+    } else if (gesture === 'thumbsDown') {
+      rating = 'wrong';
+    } else if (gesture === 'flatHand') {
+      rating = 'hard';
+    }
 
-    // Save the rating
-    const newRating: Rating = {
-      cardId: flashcards[cardIndex].id || cardIndex,
-      rating: rating,
-      timestamp: Date.now()
-    };
+    if (rating) {
+      console.log(`Rating card as ${rating} - AUTOMATIC RATING FROM GESTURE`);
+      setDebugMessage(`Rating: ${rating} - Moving to next card in 1.5s...`);
 
-    setRatings(prev => [...prev, newRating]);
-    setLastRating(rating);
+      // Disable gesture detection immediately
+      setIsGestureActive(false);
 
-    // Move to the next card after a delay
-    console.log("Will move to next card in 1.5 seconds");
-    setTimeout(moveToNextCard, 1500);
+      // Save the rating
+      const newRating: Rating = {
+        cardId: flashcards[cardIndex].id || cardIndex,
+        rating: rating,
+        timestamp: Date.now()
+      };
 
-  }, [step, cardIndex, moveToNextCard]);
+      setRatings(prev => [...prev, newRating]);
+      setLastRating(rating);
+
+      // Move to the next card after a delay
+      setTimeout(() => {
+        moveToNextCard();
+      }, 1500);
+    }
+  }, [step, cardIndex, moveToNextCard, isGestureActive]);
 
   const handleShowHint = () => {
     setShowHint(true);
@@ -148,9 +160,9 @@ const Flashcard: React.FC = () => {
                 <p>How difficult was this card?</p>
                 <p className="gesture-help">
                   Use hand gestures to answer:<br />
-                  👍 Thumbs up = Easy<br />
-                  👎 Thumbs down = Wrong<br />
-                  ✋ Flat hand = Hard
+                  👍 Thumbs up = Easy (hold for 3 seconds)<br />
+                  👎 Thumbs down = Wrong (hold for 3 seconds)<br />
+                  ✋ Flat hand = Hard (hold for 3 seconds)
                 </p>
 
                 {lastRating && (
@@ -162,7 +174,7 @@ const Flashcard: React.FC = () => {
 
                 {!lastRating && (
                   <div className="gesture-status">
-                    {isGestureActive ? 'Gesture detection active' : 'Waiting...'}
+                    {isGestureActive ? 'Hold a gesture for 3 seconds to rate' : 'Processing gesture...'}
                   </div>
                 )}
 
