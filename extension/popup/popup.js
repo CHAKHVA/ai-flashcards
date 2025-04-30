@@ -73,6 +73,7 @@ function renderRecentFlashcards(cards = []) {
             <strong>Back:</strong> ${escapeHTML(card.back)}
             ${card.hint ? `<br><strong>Hint:</strong> ${escapeHTML(card.hint)}` : ''}
             <br><strong>Tags:</strong> ${tagsHTML}
+            <br><strong>Bucket:</strong> ${card.bucket}
             <div class="timestamp">Created: ${formattedDate}</div>
         `;
     recentFlashcardsList.appendChild(cardElement);
@@ -107,6 +108,7 @@ async function handleSave(event) {
   const tags = tagsInput.value.trim().split(',')
     .map(tag => tag.trim())
     .filter(tag => tag.length > 0);
+  const bucket = 0;
 
   if (!front || !back) {
     showStatus("Front and Back fields are required.", "error");
@@ -119,6 +121,7 @@ async function handleSave(event) {
     back: back,
     hint: hint,
     tags: tags,
+    bucket: bucket,
     timestamp: new Date().toISOString() 
   };
 
