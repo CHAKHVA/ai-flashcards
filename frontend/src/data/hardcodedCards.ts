@@ -1,0 +1,81 @@
+import { Flashcard } from "../logic/types";
+
+
+export const flashcards: Flashcard[] = [
+    {
+        id: 1,
+        front: "der Tisch",
+        back: "the table",
+        hint: "Starts with T",
+        tags: ["noun", "german", "furniture"],
+        bucket: 0,
+    },
+    {
+        id: 2,
+        front: "la silla",
+        back: "the chair",
+        hint: "Starts with S",
+        tags: ["noun", "spanish", "furniture"],
+        bucket: 0,
+    },
+    {
+        id: 3,
+        front: "bonjour",
+        back: "hello",
+        tags: ["phrase", "french", "greeting"],
+        bucket: 0,
+    },
+    {
+        id: 4,
+        front: "arigato",
+        back: "thank you",
+        hint: "Expression of gratitude",
+        tags: ["phrase", "japanese"],
+        bucket: 0,
+    },
+    {
+        id: 5,
+        front: "What is the capital of France?",
+        back: "Paris",
+        tags: ["geography", "europe"],
+        bucket: 0,
+    },
+    {
+        id: 6,
+        front: "What is H2O?",
+        back: "Water",
+        hint: "A common chemical compound",
+        tags: ["science", "chemistry"],
+        bucket: 0,
+    },
+    {
+        id: 7,
+        front: "console.log()",
+        back: "Outputs a message to the web console.",
+        tags: ["programming", "javascript", "webdev"],
+        bucket: 0,
+    },
+    {
+        id: 8,
+        front: "React useState hook",
+        back: "Lets you add state to functional components.",
+        hint: "Returns a stateful value and a function to update it.",
+        tags: ["programming", "javascript", "react"],
+        bucket: 0,
+    },
+    {
+        id: 9,
+        front: "len() in Python",
+        back: "Returns the length (number of items) of an object.",
+        tags: ["programming", "python"],
+        bucket: 0,
+    },
+    {
+        id: 10,
+        front: "<a> tag in HTML",
+        back: "Defines a hyperlink.",
+        hint: "Attribute 'href' specifies the URL.",
+        tags: ["webdev", "html"],
+        bucket: 0,
+    },
+];

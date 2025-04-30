@@ -5,5 +5,4 @@ export interface Flashcard {
     hint?: string;
     tags?: string[];
     bucket: number;
-    timestamp: string;
 }
