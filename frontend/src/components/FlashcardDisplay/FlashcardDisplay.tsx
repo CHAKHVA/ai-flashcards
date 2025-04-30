@@ -15,7 +15,7 @@ const Flashcard: React.FC = () => {
   const [cardIndex, setCardIndex] = useState(0);
   const [showHint, setShowHint] = useState(false);
   const [isGestureActive, setIsGestureActive] = useState(false);
-  const [ratings, setRatings] = useState<Rating[]>([]);
+  const [_, setRatings] = useState<Rating[]>([]);
   const [lastRating, setLastRating] = useState<'easy' | 'hard' | 'wrong' | null>(null);
   const [debugMessage, setDebugMessage] = useState<string>('');
 
