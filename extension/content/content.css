@@ -1,0 +1,19 @@
+#ai-flashcard-button {
+    position: absolute;
+    z-index: 99999;
+    background-color: #2a83c3;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    font-size: 14px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    display: none;
+    white-space: nowrap;
+}
+
+#ai-flashcard-button:hover {
+    background-color: #184667;
+}
