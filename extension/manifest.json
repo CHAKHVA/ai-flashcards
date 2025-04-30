@@ -6,7 +6,8 @@
   "permissions": [
     "storage",
     "activeTab",
-    "scripting"
+    "scripting",
+    "windows"
   ],
   "action": {
     "default_popup": "popup/popup.html"
@@ -19,15 +20,7 @@
       "run_at": "document_idle"
     }
   ],
-  "host_permissions": ["<all_urls>"],
-  "web_accessible_resources": [
-    {
-      "resources": [
-        "popup/popup.html",
-        "popup/popup.css",
-        "popup/popup.js"
-      ],
-      "matches": ["<all_urls>"]
-    }
-  ]
+  "background": {
+    "service_worker": "background.js"
+  }
 }

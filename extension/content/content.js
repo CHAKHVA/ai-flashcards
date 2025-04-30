@@ -1,201 +1,121 @@
-if (typeof browser === "undefined") {
-  var browser = chrome;
-}
+console.log("AI Flashcard Creator: Content script loaded.");
 
-const ADD_BUTTON_ID = "flashcard-adder-button";
-const POPUP_IFRAME_ID = "flashcard-adder-popup-iframe";
+const ADD_BUTTON_ID = "ai-flashcard-button";
+let floatingButton;
+let currentSelection = null;
 
-// Debugging function to trace execution
-function debug(message) {
-  console.log(`[Flashcard Debug] ${message}`);
-}
-
-function removeExistingButton() {
-  debug("Removing existing button");
-  const existingButton = document.getElementById(ADD_BUTTON_ID);
-  if (existingButton) {
-    existingButton.remove();
-  }
-}
-
-function removeExistingPopup() {
-  debug("Removing existing popup");
-  const existingPopup = document.getElementById(POPUP_IFRAME_ID);
-  if (existingPopup) {
-    existingPopup.remove();
-  }
-}
-
-function createButton(x, y, text) {
-  debug(`Creating button at position: ${x}, ${y}`);
-  const button = document.createElement("button");
+function createFloatingButton() {
+  const button = document.createElement('button');
   button.id = ADD_BUTTON_ID;
-  button.textContent = "Add to Flashcard";
-  button.style.position = "fixed"; // Changed from absolute to fixed
-  button.style.left = `${x}px`;
-  button.style.top = `${y}px`;
-  button.style.zIndex = "99999";
-  button.style.padding = "8px 16px";
-  button.style.backgroundColor = "#2a83c3";
-  button.style.color = "white";
-  button.style.border = "none";
-  button.style.borderRadius = "4px";
-  button.style.cursor = "pointer";
-  button.style.boxShadow = "0 2px 4px rgba(0,0,0,0.2)";
-  button.style.fontSize = "14px";
-  button.style.fontFamily = "Arial, sans-serif";
-  button.dataset.text = text;
+  button.textContent = 'Add to Flashcard';
+  document.body.appendChild(button);
+
+  button.addEventListener('click', (event) => {
+    event.stopPropagation();
+    const selection = window.getSelection();
+    const selectedText = selection.toString().trim();
+
+    if (selectedText) {
+      console.log("AI Flashcard Creator: Button clicked. Sending text to background:", selectedText);
+      chrome.runtime.sendMessage(
+        { type: "OPEN_FLASHCARD_POPUP", text: selectedText },
+        (response) => {
+          if (chrome.runtime.lastError) {
+            console.error("AI Flashcard Creator: Error sending message:", chrome.runtime.lastError.message);
+          } else {
+            console.log("AI Flashcard Creator: Message sent, background responded:", response);
+          }
+        }
+      );
+      hideButton();
+    } else {
+      console.log("AI Flashcard Creator: No text selected when button clicked?");
+      hideButton();
+    }
+  });
   return button;
 }
 
-function createPopup(x, y, text) {
-  debug(`Creating popup at position: ${x}, ${y}`);
-  const iframe = document.createElement("iframe");
-  iframe.id = POPUP_IFRAME_ID;
-  
-  // Get the full URL for the popup
-  const popupUrl = chrome.runtime.getURL("popup/popup.html");
-  debug(`Popup URL: ${popupUrl}`);
-  
-  iframe.style.position = "fixed"; // Changed from absolute to fixed
-  iframe.style.left = `${x}px`;
-  iframe.style.top = `${y + 40}px`;
-  iframe.style.width = "400px";
-  iframe.style.height = "500px";
-  iframe.style.zIndex = "100000";
-  iframe.style.border = "none";
-  iframe.style.boxShadow = "0 2px 10px rgba(0,0,0,0.2)";
-  iframe.style.borderRadius = "8px";
-  iframe.style.backgroundColor = "white";
-  
-  // Set the src after all styles are applied
-  iframe.src = popupUrl;
-  
-  return iframe;
+function getFloatingButton() {
+  if (!floatingButton) {
+    floatingButton = createFloatingButton();
+  }
+  return floatingButton;
 }
 
-function sendMessageToPopup(iframe, text) {
-  debug("Attempting to send message to popup");
-  
-  const messageChannel = new MessageChannel();
-  const popupOrigin = chrome.runtime.getURL("").replace(/\/$/, "");
-  
-  // Set up a message listener for the popup to confirm receipt
-  messageChannel.port1.onmessage = (event) => {
-    if (event.data && event.data.status === "received") {
-      debug("Message receipt confirmed by popup");
-    }
-  };
-  
-  // Use a timeout to ensure the iframe has loaded
-  setTimeout(() => {
-    try {
-      debug("Sending postMessage to iframe");
-      iframe.contentWindow.postMessage(
-        { type: "setSelectedText", text: text },
-        "*",
-        [messageChannel.port2]
-      );
-    } catch (e) {
-      debug(`Error sending message: ${e.message}`);
-    }
-  }, 500); // Increased timeout to give iframe more time to load
+function hideButton() {
+  const button = getFloatingButton();
+  button.style.display = 'none';
+  currentSelection = null;
 }
 
-function handleSelection() {
+function showButton() {
+  if (!currentSelection) return;
+
+  const button = getFloatingButton();
+  const rect = currentSelection.rect;
+
+  const scrollX = window.scrollX || document.documentElement.scrollLeft;
+  const scrollY = window.scrollX || document.documentElement.scrollTop;
+
+  const buttonX = rect.left + scrollX;
+  const buttonY = rect.bottom + scrollY + 5;
+
+  button.style.left = `${buttonX}px`;
+  button.style.top = `${buttonY}px`;
+  button.style.display = 'block';
+}
+
+
+document.addEventListener('mouseup', (event) => {
+  if (event.target.id === ADD_BUTTON_ID || event.target.closest('input, textarea, [contenteditable=true]')) {
+    return;
+  }
+
   const selection = window.getSelection();
-  const text = selection.toString().trim();
-  
-  if (text) {
-    debug(`Text selected: ${text.substring(0, 20)}${text.length > 20 ? '...' : ''}`);
-    
+  const selectedText = selection.toString().trim();
+
+  if (selectedText.length > 0) {
+    console.log("AI Flashcard Creator: Text selected:", selectedText);
     try {
       const range = selection.getRangeAt(0);
       const rect = range.getBoundingClientRect();
-      debug(`Selection rectangle: ${JSON.stringify({
-        left: rect.left,
-        top: rect.top,
-        width: rect.width,
-        height: rect.height
-      })}`);
-      
-      if (rect.width > 0 && rect.height > 0) {
-        // Use viewport-relative coordinates since we're using position:fixed
-        const x = rect.left;
-        const y = rect.bottom + 10; // Add small offset
-        
-        removeExistingButton();
-        removeExistingPopup();
-        
-        const button = createButton(x, y, text);
-        document.body.appendChild(button);
-        debug("Button added to document");
-        
-        button.addEventListener("click", (e) => {
-          debug("Button clicked");
-          e.stopPropagation();
-          e.preventDefault();
-          
-          removeExistingButton();
-          
-          const iframe = createPopup(x, y, text);
-          document.body.appendChild(iframe);
-          debug("Iframe added to document");
-          
-          // Send message to the iframe
-          sendMessageToPopup(iframe, text);
-          
-          // Add a global click listener to detect clicks outside the popup
-          setTimeout(() => {
-            document.addEventListener("click", handleGlobalClick);
-          }, 100);
-        });
+
+      if (rect.width > 0 || rect.height > 0) {
+        currentSelection = { text: selectedText, rect: rect };
+        setTimeout(() => {
+          if (currentSelection && window.getSelection().toString().trim() === currentSelection.text) {
+            showButton();
+          }
+        }, 50);
+      } else {
+        hideButton();
+        currentSelection = null;
       }
     } catch (e) {
-      debug(`Error processing selection: ${e.message}`);
+      console.error("AI Flashcard Creator: Error getting selection range/rect", e);
+      hideButton();
+      currentSelection = null;
     }
   } else {
-    removeExistingButton();
-    removeExistingPopup();
-  }
-}
-
-function handleGlobalClick(e) {
-  const popup = document.getElementById(POPUP_IFRAME_ID);
-  const button = document.getElementById(ADD_BUTTON_ID);
-  
-  if (!popup) return;
-  
-  // Check if the click is inside the popup or button
-  const clickedPopup = e.target === popup || popup.contains(e.target);
-  const clickedButton = button && (e.target === button || button.contains(e.target));
-  
-  if (!clickedPopup && !clickedButton) {
-    debug("Click outside detected");
-    removeExistingPopup();
-    document.removeEventListener("click", handleGlobalClick);
-  }
-}
-
-// Event listeners
-document.addEventListener("mouseup", handleSelection);
-
-// Cleanup when page becomes hidden
-document.addEventListener("visibilitychange", () => {
-  if (document.hidden) {
-    debug("Page hidden, cleaning up");
-    removeExistingButton();
-    removeExistingPopup();
-    document.removeEventListener("click", handleGlobalClick);
+    if (floatingButton && floatingButton.style.display === 'block') {
+      setTimeout(hideButton, 50);
+    }
+    currentSelection = null;
   }
 });
 
-// Cleanup when navigating away
-window.addEventListener("beforeunload", () => {
-  debug("Page unloading, cleaning up");
-  removeExistingButton();
-  removeExistingPopup();
-  document.removeEventListener("click", handleGlobalClick);
+document.addEventListener('mousedown', (event) => {
+  if (floatingButton && floatingButton.style.display === 'block' && event.target.id !== ADD_BUTTON_ID) {
+    hideButton();
+  }
 });
 
-debug("Flashcard adder content script loaded.");
+document.addEventListener('scroll', () => {
+  if (floatingButton && floatingButton.style.display === 'block') {
+    hideButton();
+  }
+}, { passive: true });
+
+
+console.log("AI Flashcard Creator: Event listeners added.");
